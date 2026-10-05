@@ -1,0 +1,25 @@
+# 本机设置与临时文件
+.idea/
+.runtime/
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+
+# 数据和训练产物：以后按需加入小型示例，不整批上传
+data/
+outputs/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.wav
+*.flac
+
+# 本地补充阅读，保留文件但不随课程提交
+使用混合变分自编码器–流框架高效预测浅水声学传输损耗.pdf
