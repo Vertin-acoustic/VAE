@@ -120,3 +120,41 @@ git status
 - 新增 `notebooks/01_用Python生成频率曲线.ipynb`，更新本课计划、README、学习记录和本文档；运行检查产物保存在忽略的 outputs 目录。
 - 未执行 add、commit、push，未触碰用户的 `notebooks/测试期刊.py`。不将课程材料制作完成记录成用户掌握。
 - 课后保存命令见新 Notebook 末尾。先检查变化，再明确选择本课文件；原有手册若要一起提交，应另行核对其 HTML 和图片范围。
+
+## 第 1 课已提交、push 排查（2026-10-20）
+
+本地已存在 `1c14379`（Practice Python lists loops and functions），远程 main 经 `ls-remote` 实时查询仍是 `bd27a6b`。这说明本地 commit 已保存，尚缺实际 push；网络失败不会让已经完成的本地提交消失。
+
+排查结果：
+
+- 全局配置存在 `https.proxy=http://127.0.0.1:7897`。Git 此处使用的配置键是 `http.proxy`，也用于 HTTPS 仓库地址；不要与环境变量 `https_proxy` 混淆。
+- 本机 Clash 的 7897 端口在监听。
+- 沙箱内连接失败后，在桌面账户下分别进行直连与代理只读查询，两者当时均成功。用户原始 push 报错未提供，因此原先失败的准确原因未确认。
+- 执行 `git -c http.proxy=http://127.0.0.1:7897 push --dry-run origin main`，返回 `bd27a6b..1c14379 main -> main`，预检通过。dry-run 不更新远程分支；它也不保证真实上传时网络不会再次变化。
+- 本轮未执行实际 push，没有修改全局或仓库的持久代理设置；反馈文档修改尚未提交。
+
+用户可在当前 VAE 仓库终端重试：
+
+```powershell
+git -c http.proxy=http://127.0.0.1:7897 push origin main
+```
+
+`-c` 只为这一次 Git 进程指定配置，不需重新 add 或 commit 已存在的 `1c14379`。本轮新增反馈尚未提交，以上 push 不会顺带上传这些未提交文字。
+
+如果之后希望 PyCharm Git 按钮和普通 `git push` 都使用此代理，可在 VAE 目录执行以下**可选**仓库级配置；使用前确认 Clash 正在运行：
+
+```powershell
+git config --local http.proxy http://127.0.0.1:7897
+```
+
+不再使用该本地代理时，撤销对应配置：
+
+```powershell
+git config --local --unset http.proxy
+```
+
+PyCharm 与终端对同一个 `.git` 仓库操作：Commit 记录本地版本，Push 上传已存在的提交，Commit and Push 依次执行两步。是否显示独立暂存区取决于 PyCharm 的设置；不能把每一个 UI 勾选动作都机械等同于 git add。本例已有提交，在 PyCharm 选择 Push 并确认 `main → origin/main` 即可尝试，不必重复 Commit。
+
+另外 `docs/assets/` 仍未跟踪；手册引用的图片不会因为 push 自动进入仓库。可在完成当前推送后，单独检查并选择 `docs/assets/git-guide/` 提交。
+
+参考：[Git http.proxy 配置](https://git-scm.com/docs/git-config)、[PyCharm 提交与推送说明](https://www.jetbrains.com/help/pycharm/commit-and-push-changes.html)。
